@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vision Construções - Encomendas Online</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+    body {
+      background: #fff; /* fundo branco */
+      min-height: 100vh;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #87ceeb; /* azul do céu */
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      position: relative;
+      user-select: none;
+    }
+    .logout-btn {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      background: white;
+      color: #87ceeb;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s, color 0.3s;
+    }
+    .logout-btn:hover {
+      background: #66b0f3;
+      color: white;
+    }
+    nav {
+      background: #f0f8ff; /* azul clarinho */
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 15px 0;
+      border-bottom: 2px solid #87ceeb;
+      font-weight: 600;
+    }
+    nav button {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      color: #555;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: background 0.3s, color 0.3s;
+    }
+    nav button.active, nav button:hover {
+      background: #87ceeb;
+      color: white;
+    }
+    main {
+      flex: 1;
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+      min-height: 400px;
+    }
+
+    /* Produtos organizados em grid com cards clicáveis */
+    .produtos {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      animation: fadeIn 0.5s ease-in;
+    }
+    @media (max-width: 900px) {
+      .produtos {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
+      .produtos {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .produto {
+      border: 2px solid #87ceeb;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(135,206,235,0.3);
+      background: white;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .produto:hover, .produto:focus {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(135,206,235,0.6);
+      outline: none;
+    }
+    .produto img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .produto .info {
+      padding: 15px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .produto .info h3 {
+      color: #222;
+      margin-bottom: 8px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .produto .info p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 10px;
+      flex-grow: 1;
+    }
+    .produto .info .preco {
+      color: #87ceeb;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    /* Modal de detalhes do produto */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.4);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      animation: modalFadeIn 0.3s ease forwards;
+    }
+    .modal-close {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #87ceeb;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    .modal-close:hover {
+      color: #4aa1e0;
+    }
+    .modal-content img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .modal-content h3 {
+      margin-bottom: 10px;
+      color: #222;
+    }
+    .modal-content p {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+    .modal-content .preco {
+      font-size: 20px;
+      font-weight: bold;
+      color: #87ceeb;
+      margin-bottom: 15px;
+    }
+    .modal-content label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+    }
+    .modal-content input[type="number"] {
+      width: 70px;
+      padding: 6px 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+    .modal-content button.adicionar {
+      background: #87ceeb;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    .modal-content button.adicionar:hover {
+      background: #4aa1e0;
+    }
+
+    /* Carrinha lateral */
+    .carrinha-container {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      width: 350px;
+      max-height: 80vh;
+      background: #fff;
+      border: 2px solid #87ceeb;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(135,206,235,0.5);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+    }
+    .carrinha-header {
+      background: #87ceeb;
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .carrinha-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: none;
+      flex-direction: column;
+    }
+    .item-carrinha {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+    .item-carrinha span {
+      flex: 1;
+    }
+    .item-carrinha .qtde {
+      width: 40px;
+      text-align: center;
+    }
+    .item-carrinha .remover-btn {
+      background: transparent;
+      border: none;
+      color: #87ceeb;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 18px;
+      margin-left: 10px;
+      transition: color 0.3s;
+    }
+    .item-carrinha .remover-btn:hover {
+      color: #4aa1e0;
+    }
+
+    .entrega-container {
+      padding: 10px 0;
+      border-top: 2px solid #87ceeb;
+      font-size: 14px;
+    }
+    .entrega-container label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: #333;
+    }
+    .endereco-container {
+      margin-top: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .endereco-container input,
+    .endereco-container textarea {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+      font-size: 14px;
+      color: #333;
+    }
+
+    /* Campo nome cliente */
+    .nome-cliente-container {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .nome-cliente-container label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 600;
+      color: #333;
+    }
+    .nome-cliente-container input {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      color: #333;
+    }
+
+    .total-fatura {
+      padding: 10px 0;
+      font-weight: bold;
+      border-top: 2px solid #87ceeb;
+      text-align: right;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .botao-confirmar {
+      background: #87ceeb;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 0 0 10px 10px;
+      transition: background 0.3s;
+    }
+    .botao-confirmar:hover {
+      background: #4aa1e0;
+    }
+
+    /* Conteúdo Experiências */
+    #experiencias section {
+      margin-bottom: 20px;
+    }
+    #experiencias h2 {
+      color: #87ceeb;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    #experiencias p {
+      max-width: 700px;
+      margin: 0 auto 30px;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #444;
+      text-align: center;
+    }
+    #experiencias .galeria {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    #experiencias .galeria img {
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    #experiencias .galeria img:hover {
+      transform: scale(1.05);
+    }
+    footer {
+      background: #87ceeb;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      margin-top: auto;
+      user-select: none;
+    }
+
+    /* Animação para produtos */
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.95);}
+      to {opacity: 1; transform: scale(1);}
+    }
+    @keyframes modalFadeIn {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    /* Responsivo */
+    @media (max-width: 600px) {
+      .produto {
+        max-width: 100%;
+      }
+      #experiencias .galeria img {
+        width: 100%;
+        height: auto;
+      }
+      nav {
+        gap: 15px;
+      }
+      nav button {
+        padding: 8px 10px;
+        font-size: 14px;
+      }
+      .carrinha-container {
+        width: 90vw;
+        right: 5vw;
+        top: 70px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    Vision Construções - Encomendas Online
+    <button class="logout-btn" onclick="window.location.href='index.html'">voltar a pagina inicial</button>
+    <div style="position:absolute; left:20px; top:20px;">
+      <button id="btnIdioma" onclick="alternarIdioma()" style="background:white; color:#87ceeb; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">EN</button>
+    </div>
+    
+  </header>
+
+  <nav>
+    <button id="btn-encomendas" class="active" onclick="mostrarAba('encomendas')">Encomendas</button>
+    <button id="btn-experiencias" onclick="mostrarAba('experiencias')">Experiências em Obras</button>
+  </nav>
+
+  <main>
+    <!-- Aba Encomendas -->
+    <section id="encomendas">
+      <h2>Materiais Disponíveis</h2>
+
+      <!-- Categorias -->
+      <div id="categoriasContainer">
+        <!-- Será preenchido via JS -->
+      </div>
+    </section>
+
+    <!-- Aba Experiências -->
+    <section id="experiencias" style="display:none;">
+      <h2>Experiências em Obras com Vision Construções</h2>
+      <p>Conheça alguns dos projetos e instalações onde nossos materiais foram utilizados, garantindo qualidade, resistência e satisfação dos nossos clientes.</p>
+      <div class="galeria">
+        <img src="obra1.jpg" alt="Obra 1" />
+        <img src="obra2.jpg" alt="Obra 2" />
+        <img src="obra3.jpg" alt="Obra 3" />
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal detalhes do produto -->
+  <div class="modal" id="modalProduto" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" aria-describedby="modalDescricao">
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Fechar modal" onclick="fecharModal()">&times;</button>
+      <img id="modalImagem" src="" alt="Imagem do produto" />
+      <h3 id="modalTitulo"></h3>
+      <p id="modalDescricao"></p>
+      <p class="preco" id="modalPreco"></p>
+      <label for="modalQuantidade">Quantidade:</label>
+      <input type="number" id="modalQuantidade" value="1" min="1" />
+      <button class="adicionar" id="btnAdicionarModal">Adicionar à Carrinha</button>
+    </div>
+  </div>
+
+  <!-- Carrinha lateral -->
+  <div class="carrinha-container" id="carrinhaContainer">
+    <div class="carrinha-header" onclick="toggleCarrinha()" role="button" aria-expanded="false" tabindex="0" onkeypress="if(event.key==='Enter'){toggleCarrinha();}">
+      Carrinha 🛒 (<span id="totalItens">0</span>)
+      <small style="font-weight:normal; font-size:12px; margin-left:10px; color:#555;">Clique para abrir/fechar</small>
+    </div>
+    <div class="carrinha-body" id="carrinhaBody" aria-live="polite">
+      <div id="listaItens">
+        <!-- Itens serão inseridos aqui -->
+      </div>
+
+      <div class="nome-cliente-container">
+        <label for="inputNomeProprietario">Seu nome (cliente):</label>
+        <input type="text" id="inputNomeProprietario" placeholder="Digite seu nome aqui" />
+      </div>
+
+      <div class="entrega-container">
+        <label>
+          <input type="checkbox" id="checkboxEntrega" onchange="toggleEndereco()" />
+          Quero entrega ao domicílio (taxa extra conforme distância)
+        </label>
+        <div class="endereco-container" id="enderecoContainer">
+          <label for="inputEndereco">Endereço para entrega:</label>
+          <textarea id="inputEndereco" rows="3" placeholder="Informe seu endereço completo"></textarea>
+        </div>
+      </div>
+
+      <div class="total-fatura" id="totalFatura">Total: MZN 0</div>
+
+      <button class="botao-confirmar" onclick="confirmarCarrinha()">Confirmar Pedido</button>
+    </div>
+  </div>
+
+  <footer>
+    Vision Construções &copy; 2025 - Todos os direitos reservados<br />
+    Entregas ao domicílio incluem taxa extra conforme distância.
+  </footer>
+
+  <script>
+    const produtos = [
+  { id: 1, nome: "Chapa de Cofragem 1,20m x 0,45m", categoria: "Chapas", preco: 1300, descricao: "Chapas de cofragem tamanho padrão 1,20m x 0,45m.", img: "chapa1.jpg" },
+  { id: 2, nome: "Prumo Galvanizado (Sul Africano)", categoria: "Prumos", preco: 2400, descricao: "Prumos galvanizados para construção, alta resistência.", img: "prumo1.jpg" },
+  { id: 3, nome: "Prumo Não Galvanizado (Sul Africano)", categoria: "Prumos", preco: 1800, descricao: "Prumos não galvanizados para uso padrão.", img: "prumo2.jpg" },
+  { id: 4, nome: "Vigote Metálico", categoria: "Vigores", preco: 3800, descricao: "Vigotes metálicos para estruturação.", img: "vigor1.jpg" },
+  { id: 5, nome: "Andaime Tipo Estrela (par)", categoria: "Andaimes", preco: 24500, descricao: "Andaimes tipo estrela vendidos em par.", img: "andaime1.jpg" },
+];
+
+
+    // Categorias únicas dos produtos, mantidas na ordem Chapas, Prumos, Vigores
+    const categorias = ["Chapas", "Prumos", "Vigores","Andaimes"];
+
+    // Referências de elementos
+    const categoriasContainer = document.getElementById('categoriasContainer');
+    const modal = document.getElementById('modalProduto');
+    const modalTitulo = document.getElementById('modalTitulo');
+    const modalDescricao = document.getElementById('modalDescricao');
+    const modalPreco = document.getElementById('modalPreco');
+    const modalImagem = document.getElementById('modalImagem');
+    const modalQuantidade = document.getElementById('modalQuantidade');
+    const btnAdicionarModal = document.getElementById('btnAdicionarModal');
+    const carrinhaContainer = document.getElementById('carrinhaContainer');
+    const carrinhaBody = document.getElementById('carrinhaBody');
+    const listaItens = document.getElementById('listaItens');
+    const totalItensSpan = document.getElementById('totalItens');
+    const totalFatura = document.getElementById('totalFatura');
+    const inputNomeProprietario = document.getElementById('inputNomeProprietario');
+    const checkboxEntrega = document.getElementById('checkboxEntrega');
+    const enderecoContainer = document.getElementById('enderecoContainer');
+    const inputEndereco = document.getElementById('inputEndereco');
+
+    let carrinhaAberta = false;
+    let carrinha = []; // array de {produtoId, quantidade}
+    let produtoSelecionado = null;
+
+    // Função para mostrar aba encomendas/experiencias
+    function mostrarAba(nome) {
+      document.getElementById('encomendas').style.display = nome === 'encomendas' ? 'block' : 'none';
+      document.getElementById('experiencias').style.display = nome === 'experiencias' ? 'block' : 'none';
+
+      document.getElementById('btn-encomendas').classList.toggle('active', nome === 'encomendas');
+      document.getElementById('btn-experiencias').classList.toggle('active', nome === 'experiencias');
+    }
+
+    // Montar a lista de produtos organizados por categorias
+    function montarProdutos() {
+      categoriasContainer.innerHTML = '';
+      categorias.forEach(cat => {
+        const divCat = document.createElement('div');
+        divCat.innerHTML = `<h3 style="color:#87ceeb; margin-bottom:10px;">${cat}</h3>`;
+
+        const gridProdutos = document.createElement('div');
+        gridProdutos.classList.add('produtos');
+
+        produtos.filter(p => p.categoria === cat).forEach(prod => {
+          const card = document.createElement('button');
+          card.className = 'produto';
+          card.setAttribute('aria-label', `Ver detalhes do produto ${prod.nome}`);
+          card.innerHTML = `
+            <img src="${prod.img}" alt="${prod.nome}" />
+            <div class="info">
+              <h3>${prod.nome}</h3>
+              <p>${prod.descricao}</p>
+              <div class="preco">MZN ${prod.preco.toLocaleString('pt-MZ')}</div>
+            </div>
+          `;
+          card.onclick = () => abrirModalProduto(prod.id);
+          gridProdutos.appendChild(card);
+        });
+
+        divCat.appendChild(gridProdutos);
+        categoriasContainer.appendChild(divCat);
+      });
+    }
+
+    // Abrir modal com detalhes do produto
+    function abrirModalProduto(id) {
+      produtoSelecionado = produtos.find(p => p.id === id);
+      if (!produtoSelecionado) return;
+      modalTitulo.textContent = produtoSelecionado.nome;
+      modalDescricao.textContent = produtoSelecionado.descricao;
+      modalPreco.textContent = `Preço: MZN ${produtoSelecionado.preco.toLocaleString('pt-MZ')}`;
+      modalImagem.src = produtoSelecionado.img;
+      modalImagem.alt = produtoSelecionado.nome;
+      modalQuantidade.value = 1;
+      modal.classList.add('active');
+      modalQuantidade.focus();
+    }
+
+    // Fechar modal
+    function fecharModal() {
+      modal.classList.remove('active');
+      produtoSelecionado = null;
+    }
+
+    // Adicionar produto à carrinha
+    btnAdicionarModal.addEventListener('click', () => {
+      const qtd = parseInt(modalQuantidade.value);
+      if (!qtd || qtd < 1) {
+        alert('Por favor, insira uma quantidade válida.');
+        return;
+      }
+      adicionarProdutoCarrinha(produtoSelecionado.id, qtd);
+      fecharModal();
+      abrirCarrinha();
+    });
+
+    // Adicionar produto na carrinha
+    function adicionarProdutoCarrinha(id, qtd) {
+      const itemExistente = carrinha.find(item => item.produtoId === id);
+      if (itemExistente) {
+        itemExistente.quantidade += qtd;
+      } else {
+        carrinha.push({ produtoId: id, quantidade: qtd });
+      }
+      atualizarCarrinha();
+    }
+
+    // Atualizar a visualização da carrinha
+    function atualizarCarrinha() {
+      listaItens.innerHTML = '';
+      let totalItens = 0;
+      carrinha.forEach(item => {
+        const produto = produtos.find(p => p.id === item.produtoId);
+        if (!produto) return;
+        totalItens += item.quantidade;
+
+        const divItem = document.createElement('div');
+        divItem.className = 'item-carrinha';
+        divItem.innerHTML = `
+          <span>${produto.nome}</span>
+          <span class="qtde">x${item.quantidade}</span>
+          <button class="remover-btn" aria-label="Remover ${produto.nome}" title="Remover" onclick="removerItem(${produto.id})">&times;</button>
+        `;
+        listaItens.appendChild(divItem);
+      });
+      totalItensSpan.textContent = totalItens;
+      atualizarTotalFatura();
+    }
+
+    // Remover item da carrinha
+    function removerItem(id) {
+      carrinha = carrinha.filter(item => item.produtoId !== id);
+      atualizarCarrinha();
+    }
+
+    // Calcular e mostrar total da fatura
+    function atualizarTotalFatura() {
+      let total = 0;
+      carrinha.forEach(item => {
+        const produto = produtos.find(p => p.id === item.produtoId);
+        if (!produto) return;
+        total += produto.preco * item.quantidade;
+      });
+      totalFatura.textContent = `Total: MZN ${total.toLocaleString('pt-MZ')}`;
+    }
+
+    // Alternar abrir/fechar carrinha
+    function toggleCarrinha() {
+      carrinhaAberta = !carrinhaAberta;
+      if (carrinhaAberta) {
+        carrinhaBody.style.display = 'flex';
+        carrinhaContainer.querySelector('.carrinha-header').setAttribute('aria-expanded', 'true');
+      } else {
+        carrinhaBody.style.display = 'none';
+        carrinhaContainer.querySelector('.carrinha-header').setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    // Forçar abrir carrinha
+    function abrirCarrinha() {
+      if (!carrinhaAberta) toggleCarrinha();
+    }
+
+    // Mostrar/ocultar campo endereço de entrega
+    function toggleEndereco() {
+      enderecoContainer.style.display = checkboxEntrega.checked ? 'flex' : 'none';
+    }
+
+    // Confirmar pedido e enviar via WhatsApp
+    function confirmarCarrinha() {
+  const nomeCliente = inputNomeProprietario.value.trim();
+  if (!nomeCliente) {
+    alert('Por favor, informe seu nome para confirmar o pedido.');
+    inputNomeProprietario.focus();
+    return;
+  }
+  if (carrinha.length === 0) {
+    alert('Sua carrinha está vazia.');
+    return;
+  }
+  if (checkboxEntrega.checked) {
+    const endereco = inputEndereco.value.trim();
+    if (!endereco) {
+      alert('Por favor, informe o endereço para entrega.');
+      inputEndereco.focus();
+      return;
+    }
+  }
+
+  // Agrupar produtos por categoria
+  const agrupados = {};
+  carrinha.forEach(item => {
+    const prod = produtos.find(p => p.id === item.produtoId);
+    if (!prod) return;
+    if (!agrupados[prod.categoria]) agrupados[prod.categoria] = [];
+    agrupados[prod.categoria].push({ nome: prod.nome, preco: prod.preco, qtd: item.quantidade });
+  });
+
+  // Montar mensagem organizada por categoria com subtotais
+  let mensagem = `Olá, gostaria de fazer um pedido:\n\nCliente: ${nomeCliente}\n`;
+  if (checkboxEntrega.checked) {
+    mensagem += `Entrega: Sim\nEndereço: ${inputEndereco.value.trim()}\n\n`;
+  } else {
+    mensagem += `Entrega: Não\n\n`;
+  }
+
+  let totalFinal = 0;
+  for (const cat of categorias) {
+    if (!agrupados[cat]) continue;
+    mensagem += `*${cat}*\n`;
+    let subtotal = 0;
+    agrupados[cat].forEach(prod => {
+      const precoTotal = prod.preco * prod.qtd;
+      subtotal += precoTotal;
+      mensagem += `- ${prod.nome} x${prod.qtd}: MZN ${precoTotal.toLocaleString('pt-MZ')}\n`;
+    });
+    mensagem += `Subtotal ${cat}: MZN ${subtotal.toLocaleString('pt-MZ')}\n\n`;
+    totalFinal += subtotal;
+  }
+
+  mensagem += `*Total Final: MZN ${totalFinal.toLocaleString('pt-MZ')}*\n\nMuito obrigado!`;
+
+  // Codifica e abre WhatsApp
+  const textoUrl = encodeURIComponent(mensagem);
+  const telefoneDestino = '258877743076'; // ajuste conforme seu número real
+  window.open(`https://wa.me/${telefoneDestino}?text=${textoUrl}`, '_blank');
+}
+
+    // Fechar modal ao clicar fora do conteúdo
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) fecharModal();
+    });
+
+    // Fechar modal com ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        fecharModal();
+      }
+    });
+    let idiomaAtual = 'pt';
+
+const dicionario = {
+  pt: {
+    "Encomendas": "Encomendas",
+    "Experiências em Obras": "Experiências em Obras",
+    "Materiais Disponíveis": "Materiais Disponíveis",
+    "Experiências em Obras com Vision Construções": "Experiências em Obras com Vision Construções",
+    "Conheça alguns dos projetos e instalações onde nossos materiais foram utilizados, garantindo qualidade, resistência e satisfação dos nossos clientes.":
+      "Conheça alguns dos projetos e instalações onde nossos materiais foram utilizados, garantindo qualidade, resistência e satisfação dos nossos clientes.",
+    "Seu nome (cliente):": "Seu nome (cliente):",
+    "Quero entrega ao domicílio (taxa extra conforme distância)": "Quero entrega ao domicílio (taxa extra conforme distância)",
+    "Endereço para entrega:": "Endereço para entrega:",
+    "Confirmar Pedido": "Confirmar Pedido",
+    "voltar a pagina inicial": "voltar a pagina inicial",
+    "Clique para abrir/fechar": "Clique para abrir/fechar",
+    "Carrinha": "Carrinha",
+    "Total:": "Total:"
+  },
+  en: {
+    "Encomendas": "Orders",
+    "Experiências em Obras": "Construction Experience",
+    "Materiais Disponíveis": "Available Materials",
+    "Experiências em Obras com Vision Construções": "Construction Experiences with Vision Construções",
+    "Conheça alguns dos projetos e instalações onde nossos materiais foram utilizados, garantindo qualidade, resistência e satisfação dos nossos clientes.":
+      "See some of the projects and installations where our materials were used, ensuring quality, durability, and customer satisfaction.",
+    "Seu nome (cliente):": "Your name (customer):",
+    "Quero entrega ao domicílio (taxa extra conforme distância)": "I want home delivery (extra fee based on distance)",
+    "Endereço para entrega:": "Delivery address:",
+    "Confirmar Pedido": "Confirm Order",
+    "voltar a pagina inicial": "back to homepage",
+    "Clique para abrir/fechar": "Click to open/close",
+    "Carrinha": "Cart",
+    "Total:": "Total:"
+  }
+};
+
+function alternarIdioma() {
+  idiomaAtual = idiomaAtual === 'pt' ? 'en' : 'pt';
+  const langAtual = idiomaAtual;
+  document.getElementById('btnIdioma').innerText = langAtual === 'pt' ? 'EN' : 'PT';
+
+  // Seleciona os elementos com texto que devem ser traduzidos
+  const todos = document.querySelectorAll('button, h1, h2, h3, p, label, .carrinha-header, .botao-confirmar, .logout-btn, small');
+
+  todos.forEach(el => {
+    const textoOriginal = el.getAttribute('data-original');
+    let textoAtual = textoOriginal || el.innerText.trim();
+
+    // Salva texto original se ainda não estiver salvo
+    if (!el.hasAttribute('data-original')) {
+      el.setAttribute('data-original', textoAtual);
+    }
+
+    const traducao = dicionario[langAtual][textoAtual];
+    if (traducao) {
+      el.innerText = traducao;
+    }
+  });
+}
+
+    // Montar produtos no carregamento da página
+    montarProdutos();
+  </script>
+</body>
+</html>
