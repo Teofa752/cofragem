@@ -238,6 +238,7 @@
       background: #4aa1e0;
     }
 
+      
     /* Carrinha lateral */
     .carrinha-container {
       position: fixed;
@@ -454,6 +455,83 @@
         top: 70px;
       }
     }
+
+    @media (max-width: 600px) {
+  .carrinha-container {
+    top: auto;
+    bottom: 20px;
+    right: 10px;
+    width: 90vw;
+    max-width: 320px;
+    box-shadow: 0 0 10px rgba(135,206,235,0.3);
+    border-radius: 8px;
+  }
+
+  .carrinha-header {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    font-size: 14px;
+    gap: 4px;
+    padding: 10px 12px;
+  }
+
+  .carrinha-header span,
+  .carrinha-header small {
+    display: block;
+    width: 100%;
+  }
+
+  .carrinha-header span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: bold;
+  }
+
+  .carrinha-header small {
+    font-size: 12px;
+    color: #e6f7ff;
+  }
+}
+
+.hamburguer {
+  display: none; /* escondido por padrão */
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+@media (max-width: 768px) {
+  .hamburguer {
+    display: block; /* aparece no mobile */
+  }
+  .nav-links {
+    display: none; /* escondido no mobile até clicar */
+    flex-direction: column;
+    gap: 15px;
+    background: #f0f8ff;
+    padding: 10px;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    border-bottom: 2px solid #87ceeb;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+  .nav-links.show {
+    display: flex; /* aparece quando ativo */
+  }
+}
+
   </style>
 </head>
 <body>
@@ -467,9 +545,14 @@
   </header>
 
   <nav>
+  <button class="hamburguer" onclick="toggleMenu()">
+    &#9776; <!-- Ícone hambúrguer -->
+  </button>
+  <div class="nav-links" id="navLinks">
     <button id="btn-encomendas" class="active" onclick="mostrarAba('encomendas')">Encomendas</button>
     <button id="btn-experiencias" onclick="mostrarAba('experiencias')">Experiências em Obras</button>
-  </nav>
+  </div>
+</nav>
 
   <main>
     <!-- Aba Encomendas -->
@@ -857,6 +940,11 @@ function alternarIdioma() {
     }
   });
 }
+function toggleMenu() {
+  const navLinks = document.getElementById('navLinks');
+  navLinks.classList.toggle('show');
+}
+
 
     // Montar produtos no carregamento da página
     montarProdutos();
