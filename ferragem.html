@@ -3,976 +3,941 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vision Construções - Bem-vindo</title>
+  <title>Vision Construções - Encomendas Online</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+    body {
+      background: #fff; /* fundo branco */
+      min-height: 100vh;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+    }
+    header {    
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      background: linear-gradient(to right, #0052D4, #65C7F7, #9CECFB); /* azul mais profissional */
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+    }
 
-      * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-}
+    .logout-btn {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      background: white;
+      color: #87ceeb;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s, color 0.3s;
+    }
+    .logout-btn:hover {
+      background: #66b0f3;
+      color: white;
+    }
+    nav {
+      background: #f0f8ff; /* azul clarinho */
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 15px 0;
+      border-bottom: 2px solid #87ceeb;
+      font-weight: 600;
+    }
+    nav button {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      color: #555;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: background 0.3s, color 0.3s;
+    }
+    nav button.active, nav button:hover {
+      background: #87ceeb;
+      color: white;
+    }
+    main {
+      flex: 1;
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+      min-height: 400px;
+    }
 
-body {
-  background: linear-gradient(-45deg, #d90000, #87ceeb, #ffffff, #d90000);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
-}
+    /* Produtos organizados em grid com cards clicáveis */
+    .produtos {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      animation: fadeIn 0.5s ease-in;
+    }
+    @media (max-width: 900px) {
+      .produtos {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
+      .produtos {
+        grid-template-columns: 1fr;
+      }
+    }
 
-@keyframes gradientBG {
-  0% {background-position: 0% 50%;}
-  50% {background-position: 100% 50%;}
-  100% {background-position: 0% 50%;}
-}
+    .produto {
+      border: 1px solid #eee;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: 0.2s ease;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;  
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .produto:hover, .produto:focus {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(135,206,235,0.6);
+      outline: none;
+    }
+    .produto img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .produto .info {
+      padding: 15px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .produto .info h3 {
+      color: #222;
+      margin-bottom: 8px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .produto .info p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 10px;
+      flex-grow: 1;
+    }
+    .produto .info .preco {
+      font-size: 18px;
+      color: #ff4d4f;
+    }
 
-.navbar {
-  background: skyblue;
+    /* Modal de detalhes do produto */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.4);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      animation: modalFadeIn 0.3s ease forwards;
+    }
+    .modal-close {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #87ceeb;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    .modal-close:hover {
+      color: #4aa1e0;
+    }
+    .modal-content img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .modal-content h3 {
+      margin-bottom: 10px;
+      color: #222;
+    }
+    .modal-content p {
+      margin-bottom: 10px;
+      color: #444;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+    .modal-content .preco {
+      font-size: 20px;
+      font-weight: bold;
+      color: #87ceeb;
+      margin-bottom: 15px;
+    }
+    .modal-content label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+    }
+    .modal-content input[type="number"] {
+      width: 70px;
+      padding: 6px 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 15px;
+    }
+    .modal-content button.adicionar {
+      background: #87ceeb;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+
+    .modal-content button.adicionar {
+      background: linear-gradient(to right, #f5222d, #fa541c);
+      font-size: 16px;
+    }
+
+    /* Carrinha lateral */
+  .carrinha-container {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: #87ceeb;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+  }
+ 
+ .carrinha-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
-  border-bottom: 2px solid #ddd;
-}
-
-.logo-img {
-  height: 50px;
-}
-
-.logo-nome-link {
-  color: #d90000;
-  font-weight: bold;
+  justify-content: center;
+  color: white;
   font-size: 22px;
-  text-decoration: none;
-  padding: 8px 16px;
-  border: 2px solid #d90000;
-  border-radius: 6px;
-  transition: 0.3s ease;
 }
 
-.logo-nome-link:hover {
-  background-color: #d90000;
-  color: white;
+.carrinha-header small {
+  display: none; /* Esconde o texto menor dentro do botão */
 }
 
-.container {
-  display: flex;
-  flex-wrap: wrap;
-  min-height: 80vh;
-  padding: 40px 60px;
-  gap: 40px;
-  background-color: white;
-}
-
-.texto-esquerdo {
-  flex: 1;
-  min-width: 300px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 20px;
-}
-
-h1#bemvindo-texto {
-  font-size: 36px;
-  color: #d90000;
-  font-weight: 900;
-}
-
-.barras-coloridas {
-  display: flex;
-  gap: 10px;
-  width: 180px;
-}
-
-.barra {
-  height: 8px;
-  flex: 1;
-  border-radius: 4px;
-  box-shadow: 0 0 6px rgba(0,0,0,0.2);
-}
-
-.vermelho { background-color: #d90000; }
-.azulceu { background-color: #87ceeb; }
-.branco { background-color: #ffffff; border: 1px solid #ccc; }
-
-.apresentacao {
-  font-size: 16px;
-  color: #444;
-  line-height: 1.6;
-}
-
-.contatos {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.contato {
-  color: #333;
-  text-decoration: none;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: 0.3s;
-}
-
-.contato i {
-  font-size: 20px;
-}
-
-.contato:hover {
-  color: #d90000;
-}
-
-.informacoes-loja {
-  font-size: 15px;
-  color: #444;
-}
-
-.informacoes-loja a {
-  color: #0047ab;
-  text-decoration: underline;
-}
-
-.imagem-direito {
-  flex: 1;
-  min-width: 280px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.imagem-triangulo {
-  width: 100%;
-  max-width: 450px;
-  overflow: hidden;
-  border-radius: 12px;
-  border: 8px solid transparent;
-  border-image: linear-gradient(to bottom, #d90000, #87ceeb, #ffffff);
-  border-image-slice: 1;
-}
-
-.imagem-triangulo img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.imagem-triangulo img:hover {
-  transform: scale(1.05);
-}
-
-.btn-flutuante-whatsapp {
+.carrinha-body {
   position: fixed;
-  bottom: 5px;
-  right: 10px;
-  background: #25d366;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 55px;
-  height: 55px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  z-index: 1000;
-  cursor: pointer;
-}
-
-.btn-pedido-fixo {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: #d90000;
-  color: white;
-  text-align: center;
-  font-size: 18px;
-  padding: 15px;
-  display: none;
-  z-index: 999;
-  cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .btn-pedido-fixo { display: block; }
-}
-
-.avaliacoes {
-  padding: 40px;
-  background: #f8f8f8;
-  border-top: 1px solid #ccc;
-}
-
-.avaliacoes h2 {
-  text-align: center;
-  color: #d90000;
-  margin-bottom: 20px;
-}
-
-#abrir-formulario-comentario {
-  cursor: pointer;
-  color: #d90000;
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 15px;
-  user-select: none;
-}
-
-.form-avaliacao {
-  max-width: 600px;
-  margin: 0 auto 30px auto;
+  top: 0;   /* Vai ser ajustado via JS */
+  right: 0; /* Vai ser ajustado via JS */
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
   background: white;
-  padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  display: none;
-}
-
-.form-avaliacao input, .form-avaliacao textarea {
-  width: 100%;
-  margin-bottom: 15px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-.form-avaliacao .estrelas i {
-  color: #ccc;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-.form-avaliacao .estrelas i.selecionada {
-  color: gold;
-}
-
-.form-avaliacao button {
-  background: #d90000;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.avaliacao-item {
-  background: white;
-  padding: 20px;
-  margin: 10px auto;
-  max-width: 700px;
-  border-left: 5px solid #87ceeb;
-}
-
-.avaliacao-item strong {
-  display: block;
-  margin-bottom: 8px;
-}
-
-footer.footer {
-  background-color: #65acc8;
-  padding: 20px;
-  text-align: center;
-  font-size: 14px;
-  color: #25282a;
-  border-top: 1px solid #ccc;
-}
-
-.redes-sociais {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
-
-.redes-sociais a {
-  color: #202020;
-  font-size: 20px;
-  transition: color 0.3s;
-}
-
-.redes-sociais a:hover {
-  color: #d90000;
-}
-
-.idioma-switch {
-  position: fixed;
-  top: 70px;
-  left: 20px;
-  background-color: #d90000;
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
-  padding: 12px 22px;
-  border-radius: 30px;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(217,0,0,0.6);
-  user-select: none;
-  z-index: 2000;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.idioma-switch:hover {
-  background-color: #a70000;
-  transform: scale(1.05);
-}
-
-.menu-mobile {
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
   display: none;
   flex-direction: column;
-  background: white;
-  position: absolute;
-  top: 70px;
-  right: 20px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
   padding: 15px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  z-index: 999;
+  z-index: 1001;
 }
 
-.menu-mobile a, .menu-mobile .btn-pedido-fixo {
-  padding: 10px;
-  text-align: left;
-  color: #d90000;
-  font-weight: bold;
-  text-decoration: none;
-  border-bottom: 1px solid #eee;
-}
-
-.menu-mobile .btn-pedido-fixo {
-  border: none;
-  text-align: center;
-  background: #d90000;
-  color: white;
-  border-radius: 8px;
-  margin-top: 10px;
-}
-
-.menu-links {
-  display: flex;
-  gap: 20px;
-}
-
-.imagem-triangulo img {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.imagem-triangulo img:hover {
-  transform: scale(1.07) translateY(-5px);
-  box-shadow: 0 10px 15px rgba(0,0,0,0.2);
-}
-
-.logo-nome-link {
-  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
-}
-
-.logo-nome-link:hover {
-  transform: scale(1.05);
-}
-
-.contato i, .redes-sociais a i {
-  transition: transform 0.3s ease, color 0.3s ease;
-}
-
-.contato:hover i, .redes-sociais a:hover i {
-  color: #d90000;
-  transform: scale(1.2);
-}
-
-/* Oculta o menu no mobile por padrão */
-@media (max-width: 768px) {
-  .menu-links {
-    display: none;
-    flex-direction: column;
-    background: white;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    right: 0;
-    padding: 10px 0;
-    z-index: 999;
+  .item-carrinha {
+    display: flex;
+    justify-content: space-between;
+    background: #f9f9f9;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
   }
-
-  .menu-links.show {
-    display: flex !important;
-  }
-
-  .hamburguer {
-    display: block;
-    background: none;
+    .remover-btn {
+    background: red;
+    color: white;
     border: none;
-    font-size: 28px;
-    color: #d90000;
+    border-radius: 4px;
     cursor: pointer;
+    padding: 2px 6px;
   }
-}
 
-/* Exibe o hambúrguer em telas menores que 768px */
-@media (max-width: 768px) {
-  #btnHamburguer {
-    display: block;
-    cursor: pointer;
+  .total-fatura {
+    font-weight: bold;
+    margin-top: 10px;
   }
-  
-  #menuLinks {
-    display: none; /* Esconde menu até o hambúrguer ser clicado */
+
+  .botao-confirmar {
+    background: green;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .nome-cliente-container,
+  .entrega-container,
+  .endereco-container {
+    display: flex;
     flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
   }
-  
-  #menuLinks.show {
-    display: flex; /* Exibe menu quando toggled */
+  .item-carrinha span {
+    flex: 1;
   }
-}
-/* Esconde o hambúrguer em telas maiores que 768px */
-@media (min-width: 769px) {
-  #btnHamburguer {
-    display: none;
+  .item-carrinha .qtde {
+  width: 40px;
+  text-align: center;
   }
-  
-  #menuLinks {
-    display: flex !important; /* Força o menu visível em desktop */
-  }
-}
+    .item-carrinha .remover-btn {
+      background: transparent;
+      border: none;
+      color: #87ceeb;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 18px;
+      margin-left: 10px;
+      transition: color 0.3s;
+    }
+    .item-carrinha .remover-btn:hover {
+      color: #4aa1e0;
+    }
 
+    .entrega-container {
+      padding: 10px 0;
+      border-top: 2px solid #87ceeb;
+      font-size: 14px;
+    }
+    .entrega-container label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: #333;
+    }
+    .endereco-container {
+      margin-top: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .endereco-container input,
+    .endereco-container textarea {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+      font-size: 14px;
+      color: #333;
+    }
 
-</style>
+    /* Campo nome cliente */
+    .nome-cliente-container {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .nome-cliente-container label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 600;
+      color: #333;
+    }
+    .nome-cliente-container input {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      color: #333;
+    }
+
+    .total-fatura {
+      padding: 10px 0;
+      font-weight: bold;
+      border-top: 2px solid #87ceeb;
+      text-align: right;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .botao-confirmar {
+      background: #87ceeb;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 0 0 10px 10px;
+      transition: background 0.3s;
+    }
+    .botao-confirmar:hover {
+      background: #4aa1e0;
+    }
+
+    /* Conteúdo Experiências */
+    #experiencias section {
+      margin-bottom: 20px;
+    }
+    #experiencias h2 {
+      color: #87ceeb;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    #experiencias p {
+      max-width: 700px;
+      margin: 0 auto 30px;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #444;
+      text-align: center;
+    }
+    #experiencias .galeria {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    #experiencias .galeria img {
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    #experiencias .galeria img:hover {
+      transform: scale(1.05);
+    }
+    footer {
+      background: #87ceeb;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      margin-top: auto;
+      user-select: none;
+    }
+
+    /* Animação para produtos */
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.95);}
+      to {opacity: 1; transform: scale(1);}
+    }
+    @keyframes modalFadeIn {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    /* Responsivo */
+    @media (max-width: 600px) {
+      .produto {
+        max-width: 100%;
+      }
+      #experiencias .galeria img {
+        width: 100%;
+        height: auto;
+      }
+      nav {
+        gap: 15px;
+      }
+      nav button {
+        padding: 8px 10px;
+        font-size: 14px;
+      }
+      .carrinha-container {
+        width: 90vw;
+        right: 5vw;
+        top: 70px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="idioma-switch" onclick="alternarIdioma()">EN</div>
+  <header>
+    Vision Construções - Encomendas Online
+    <button class="logout-btn" onclick="window.location.href='index.html'">voltar a pagina inicial</button>
+    <div style="position:absolute; left:20px; top:20px;">
+      <button id="btnIdioma" onclick="alternarIdioma()" style="background:white; color:#87ceeb; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">EN</button>
+    </div>
+    
+  </header>
 
-<header class="navbar">
-  <img src="luata 1.PNG" alt="Logo" class="logo-img" />
+  <nav>
+    <button id="btn-encomendas" class="active" onclick="mostrarAba('encomendas')">Encomendas</button>
+    <button id="btn-experiencias" onclick="mostrarAba('experiencias')">Experiências em Obras</button>
+  </nav>
 
- <!-- Botão hamburguer para telas pequenas -->
-<button id="btnHamburguer" class="hamburguer">
-  <i class="fas fa-bars"></i>
-</button>
+  <main>
+    <!-- Aba Encomendas -->
+    <section id="encomendas">
+      <h2>Materiais Disponíveis</h2>
 
-<!-- Menu de navegação -->
-<nav class="menu-links" id="menuLinks">
-  <a href="ferragem.html" class="logo-nome-link" id="link-materiais">Materiais Disponíveis</a>
-  <a href="#" class="logo-nome-link" onclick="gerarReciboPDF()">📄 Gerar Recibo Em PDF</a>
-</nav>
-
-</header>
-
-
-  <main class="container">
-    <section class="texto-esquerdo">
-      <h1 id="bemvindo-texto">Bem-vindo à Vision Construções</h1>
-      <div class="barras-coloridas">
-        <div class="barra vermelho"></div>
-        <div class="barra azulceu"></div>
-        <div class="barra branco"></div>
-      </div>
-
-      <p id="apresentacao-texto" class="apresentacao">
-  A <strong>Vision Construções</strong> é especializada na <strong>venda de materiais de construção</strong> e também <strong>aluga equipamentos</strong> como Chapas,Vigores,Prumos, Andaimes e mais. <br><br>
-  Garantimos qualidade, segurança e pontualidade em cada serviço. 👷‍♂️🏗️ <br><br>
-  <strong>Além da venda</strong>, alugamos os equipamentos que você precisa. Para alugar, clique no botão <strong style="color: #d90000;">🔧 Aluguer de Equipamentos</strong> no topo da página e fale conosco direto no WhatsApp!
-</p>
-
-      
-      <h2 id="fale-conosco">Fale Conosco:</h2>
-      <div class="contatos">
-        <div class="contato" id="telefone" title="Telefone">
-          <i class="fas fa-phone"></i> 
-          <div style="display: flex; flex-direction: column; gap: 5px; margin-left: 8px;">
-            <a href="tel:+258877743076" style="color: inherit; text-decoration: none;">+258 877 743 076</a>
-            <a href="tel:+258847743076" style="color: inherit; text-decoration: none;">+258 847 743 076</a>
-          </div>
-        </div>
-        
-        <a href="https://wa.me/258847283376" target="_blank" class="contato" id="whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-        <a href="mailto:exemplo@gmail.com" class="contato" id="email"><i class="fas fa-envelope"></i> Email</a>
-      </div>
-      <div class="informacoes-loja">
-        <p><a href="https://maps.google.com/?q=Machava+Km15+Matola" target="_blank" id="link-maps">Encontre-nos no Google Maps</a></p>
-        <p><strong id="proprietario-texto">Proprietário:</strong> João da Silva</p>
+      <!-- Categorias -->
+      <div id="categoriasContainer">
+        <!-- Será preenchido via JS -->
       </div>
     </section>
 
-    <section class="imagem-direito">
-      <div class="imagem-triangulo">
-        <img src="luata 1.PNG" alt="Materiais de Construção" />
+    <!-- Aba Experiências -->
+    <section id="experiencias" style="display:none;">
+      <h2>Experiências em Obras com Vision Construções</h2>
+      <p>Conheça alguns dos projetos e instalações onde nossos materiais foram utilizados, garantindo qualidade, resistência e satisfação dos nossos clientes.</p>
+      <div class="galeria">
+        <img src="obra1.jpg" alt="Obra 1" />
+        <img src="obra2.jpg" alt="Obra 2" />
+        <img src="obra3.jpg" alt="Obra 3" />
       </div>
     </section>
   </main>
 
-  <section class="avaliacoes">
-    <h2 id="titulo-avaliacoes">Comentários e Avaliações dos Clientes</h2>
-
-    <div id="abrir-formulario-comentario">Clique aqui para deixar seu comentário e avaliação ★</div>
-
-    <form class="form-avaliacao" onsubmit="enviarAvaliacao(event)">
-      <input type="text" id="nomeCliente" placeholder="Seu nome" required />
-      <textarea id="comentarioCliente" rows="4" placeholder="Escreva seu comentário" required></textarea>
-      <div class="estrelas" id="estrelas">
-        <i class="fas fa-star" data-index="1"></i>
-        <i class="fas fa-star" data-index="2"></i>
-        <i class="fas fa-star" data-index="3"></i>
-        <i class="fas fa-star" data-index="4"></i>
-        <i class="fas fa-star" data-index="5"></i>
-      </div>
-      <button type="submit" id="botao-enviar">Enviar Avaliação</button>
-    </form>
-
-    <div id="avaliacoes-lista"></div>
-  </section>
-
-  <button class="btn-flutuante-whatsapp" onclick="abrirWhatsApp()" aria-label="WhatsApp">
-    <i class="fab fa-whatsapp"></i>
-  </button>
-
-  <div class="btn-pedido-fixo" id="botao-pedido" onclick="gerarReciboPDF()">Gerar Recibo PDF</div>
-
-  <!-- Rodapé -->
-  <footer class="footer">
-    <p>© 2025 Vision Construções - Criado pela empresa T&T</p>
-    <div class="redes-sociais">
-      <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-      <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+  <!-- Modal detalhes do produto -->
+  <div class="modal" id="modalProduto" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" aria-describedby="modalDescricao">
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Fechar modal" onclick="fecharModal()">&times;</button>
+      <img id="modalImagem" src="" alt="Imagem do produto" />
+      <h3 id="modalTitulo"></h3>
+      <p id="modalDescricao"></p>
+      <p class="preco" id="modalPreco"></p>
+      <label for="modalQuantidade">Quantidade:</label>
+      <input type="number" id="modalQuantidade" value="1" min="1" />
+      <button class="adicionar" id="btnAdicionarModal">Adicionar à Carrinha</button>
     </div>
+  </div>
+
+  <!-- Carrinha lateral -->
+  <div class="carrinha-container" id="carrinhaContainer">
+    <div class="carrinha-header" onclick="toggleCarrinha()">
+      🛒 (<span id="totalItens">0</span>)
+    </div>
+    <div class="carrinha-body" id="carrinhaBody">
+      <div id="listaItens"></div>
+
+    <div class="nome-cliente-container">
+      <label for="inputNomeProprietario">Seu nome:</label>
+      <input type="text" id="inputNomeProprietario" placeholder="Digite seu nome" />
+    </div>
+
+
+
+    <div class="entrega-container">
+      <label>
+        <input type="checkbox" id="checkboxEntrega" onchange="toggleEndereco()" />
+        Quero entrega ao domícilio ( contem uma taxa extra)
+      </label>
+      <div class="endereco-container" id="enderecoContainer">
+        <label for="inputEndereco">Endereço para entrega:</label>
+        <textarea id="inputEndereco" rows="3" placeholder="Informe seu endereço"></textarea>
+      </div>
+    </div>
+
+    <div class="total-fatura" id="totalFatura">Total: MZN 0</div>
+
+    <button class="botao-confirmar" onclick="confirmarCarrinha()">Mandar pelo WhatsApp</button>
+    </div>
+</div>
+
+  <footer>
+    Vision Construções &copy; 2025 - Todos os direitos reservados<br />
+    Entregas ao domicílio incluem taxa extra conforme distância.
   </footer>
 
   <script>
-    const textos = {
-      PT: {
-        bemvindoTexto: "Bem-vindo à Vision Construções",
-        apresentacaoTexto: "A <strong>Vision Construções</strong> é especializada na venda de materiais de construção e aluguer de equipamentos. Comprometida com qualidade, segurança e pontualidade. 👷‍♂️🏗️",
-        faleConosco: "Fale Conosco:",
-        telefone: "Telefone",
-        whatsapp: "WhatsApp",
-        email: "Email",
-        abrirFormularioComentario: "Clique aqui para deixar seu comentário e avaliação ★",
-        botaoPedido: "Fazer Pedido",
-        tituloAvaliacoes: "Comentários e Avaliações dos Clientes",
-        linkMateriais: "Materiais Disponíveis",
-        linkMaps: "Encontre-nos no Google Maps",
-        proprietarioTexto: "Proprietário:",
-        botaoEnviar: "Enviar Avaliação"
-      },
-      EN: {
-        bemvindoTexto: "Welcome to Vision Construções",
-        apresentacaoTexto: "Vision Construções specializes in selling construction materials and equipment rentals. Committed to quality, safety, and punctuality. 👷‍♂️🏗️",
-        faleConosco: "Contact Us:",
-        telefone: "Phone",
-        whatsapp: "WhatsApp",
-        email: "Email",
-        abrirFormularioComentario: "Click here to leave your comment and rating ★",
-        botaoPedido: "Place Order",
-        tituloAvaliacoes: "Customer Comments and Reviews",
-        linkMateriais: "Available Materials",
-        linkMaps: "Find us on Google Maps",
-        proprietarioTexto: "Owner:",
-        botaoEnviar: "Submit Review"
-      }
-    };
-  
-    function abrirWhatsApp() {
-      window.open("https://wa.me/258877743076", "_blank");
+    const produtos = [
+  { id: 1, nome: "Chapa de Cofragem 1,20m x 0,45m", categoria: "Chapas", preco: 1300, descricao: "Chapas de cofragem tamanho padrão 1,20m x 0,45m.", img: "chapa1.jpg" },
+  { id: 2, nome: "Prumo Galvanizado (Sul Africano)", categoria: "Prumos", preco: 2400, descricao: "Prumos galvanizados para construção, alta resistência.", img: "prumo1.jpg" },
+  { id: 3, nome: "Prumo Não Galvanizado (Sul Africano)", categoria: "Prumos", preco: 1800, descricao: "Prumos não galvanizados para uso padrão.", img: "prumo2.jpg" },
+  { id: 4, nome: "Vigote Metálico", categoria: "Vigores", preco: 3800, descricao: "Vigotes metálicos para estruturação.", img: "vigor1.jpg" },
+  { id: 5, nome: "Andaime Tipo Estrela (par)", categoria: "Andaimes", preco: 24500, descricao: "Andaimes tipo estrela vendidos em par.", img: "andaime1.jpg" },
+];
+
+
+    // Categorias únicas dos produtos, mantidas na ordem Chapas, Prumos, Vigores
+    const categorias = ["Chapas", "Prumos", "Vigores","Andaimes"];
+
+    // Referências de elementos
+    const categoriasContainer = document.getElementById('categoriasContainer');
+    const modal = document.getElementById('modalProduto');
+    const modalTitulo = document.getElementById('modalTitulo');
+    const modalDescricao = document.getElementById('modalDescricao');
+    const modalPreco = document.getElementById('modalPreco');
+    const modalImagem = document.getElementById('modalImagem');
+    const modalQuantidade = document.getElementById('modalQuantidade');
+    const btnAdicionarModal = document.getElementById('btnAdicionarModal');
+    const carrinhaContainer = document.getElementById('carrinhaContainer');
+    const carrinhaBody = document.getElementById('carrinhaBody');
+    const listaItens = document.getElementById('listaItens');
+    const totalItensSpan = document.getElementById('totalItens');
+    const totalFatura = document.getElementById('totalFatura');
+    const inputNomeProprietario = document.getElementById('inputNomeProprietario');
+    const checkboxEntrega = document.getElementById('checkboxEntrega');
+    const enderecoContainer = document.getElementById('enderecoContainer');
+    const inputEndereco = document.getElementById('inputEndereco');
+
+    let carrinhaAberta = false;
+    let carrinha = []; // array de {produtoId, quantidade}
+    let produtoSelecionado = null;
+
+    // Função para mostrar aba encomendas/experiencias
+    function mostrarAba(nome) {
+      document.getElementById('encomendas').style.display = nome === 'encomendas' ? 'block' : 'none';
+      document.getElementById('experiencias').style.display = nome === 'experiencias' ? 'block' : 'none';
+
+      document.getElementById('btn-encomendas').classList.toggle('active', nome === 'encomendas');
+      document.getElementById('btn-experiencias').classList.toggle('active', nome === 'experiencias');
     }
-  
-    function gerarReciboPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("Recibo da Encomenda", 20, 20);
-      doc.text("Produto 1: Betoneira", 20, 30);
-      doc.text("Total: 1.000 MZN", 20, 40);
-      doc.save("recibo.pdf");
-    }
-  
-    // Controle das estrelas
-    let estrelasSelecionadas = 0;
-    const estrelas = document.querySelectorAll('#estrelas i');
-    estrelas.forEach(star => {
-      star.addEventListener('click', () => {
-        estrelasSelecionadas = parseInt(star.dataset.index);
-        atualizarEstrelas(estrelasSelecionadas);
-      });
+
+   // Montar a lista de produtos organizados por categorias
+function montarProdutos() {
+  categoriasContainer.innerHTML = '';
+
+  // Definição dos ícones para cada categoria
+  const iconesCategorias = {
+    "Chapas": "fa-layer-group",
+    "Prumos": "fa-ruler-vertical",
+    "Vigores": "fa-bars-staggered",
+    "Andaimes": "fa-tower-cell"
+  };
+
+  categorias.forEach(cat => {
+    const divCat = document.createElement('div');
+
+    // Pegar o ícone correspondente ou usar o padrão
+    const icone = iconesCategorias[cat] || "fa-boxes-stacked";
+
+    // Título da categoria com ícone
+    divCat.innerHTML = `
+      <h3 style="color:#333; font-size:22px; margin:15px 0;">
+        <i class="fa-solid ${icone}" style="margin-right:8px; color:#87ceeb;"></i>${cat}
+      </h3>
+    `;
+
+    const gridProdutos = document.createElement('div');
+    gridProdutos.classList.add('produtos');
+
+    produtos.filter(p => p.categoria === cat).forEach(prod => {
+      const card = document.createElement('button');
+      card.className = 'produto';
+      card.setAttribute('aria-label', `Ver detalhes do produto ${prod.nome}`);
+      card.innerHTML = `
+        <img src="${prod.img}" alt="${prod.nome}" />
+        <div class="info">
+          <h3>${prod.nome}</h3>
+          <p>${prod.descricao}</p>
+          <div class="preco">MZN ${prod.preco.toLocaleString('pt-MZ')}</div>
+        </div>
+      `;
+      card.onclick = () => abrirModalProduto(prod.id);
+      gridProdutos.appendChild(card);
     });
-  
-    function atualizarEstrelas(index) {
-      estrelas.forEach(star => {
-        star.classList.toggle('selecionada', parseInt(star.dataset.index) <= index);
-      });
+
+    divCat.appendChild(gridProdutos);
+    categoriasContainer.appendChild(divCat);
+  });
+}
+
+
+    // Abrir modal com detalhes do produto
+    function abrirModalProduto(id) {
+      produtoSelecionado = produtos.find(p => p.id === id);
+      if (!produtoSelecionado) return;
+      modalTitulo.textContent = produtoSelecionado.nome;
+      modalDescricao.textContent = produtoSelecionado.descricao;
+      modalPreco.textContent = `Preço: MZN ${produtoSelecionado.preco.toLocaleString('pt-MZ')}`;
+      modalImagem.src = produtoSelecionado.img;
+      modalImagem.alt = produtoSelecionado.nome;
+      modalQuantidade.value = 1;
+      modal.classList.add('active');
+      modalQuantidade.focus();
     }
-  
-    // Mostrar e esconder formulário de comentário
-    const abrirFormularioBtn = document.getElementById('abrir-formulario-comentario');
-    const formulario = document.querySelector('.form-avaliacao');
-  
-    abrirFormularioBtn.addEventListener('click', () => {
-      abrirFormularioBtn.style.display = 'none';
-      formulario.style.display = 'block';
-    });
-  
-    // Enviar avaliação
-    function enviarAvaliacao(e) {
-      e.preventDefault();
-  
-      const nome = document.getElementById('nomeCliente').value.trim();
-      const comentario = document.getElementById('comentarioCliente').value.trim();
-  
-      if (!nome || !comentario || estrelasSelecionadas === 0) {
-        alert('Por favor, preencha seu nome, comentário e selecione a quantidade de estrelas.');
+
+    // Fechar modal
+    function fecharModal() {
+      modal.classList.remove('active');
+      produtoSelecionado = null;
+    }
+
+    // Adicionar produto à carrinha
+    btnAdicionarModal.addEventListener('click', () => {
+      const qtd = parseInt(modalQuantidade.value);
+      if (!qtd || qtd < 1) {
+        alert('Por favor, insira uma quantidade válida.');
         return;
       }
-  
-      const estrelasTexto = '★'.repeat(estrelasSelecionadas) + '☆'.repeat(5 - estrelasSelecionadas);
-  
-      const div = document.createElement('div');
-      div.classList.add('avaliacao-item');
-      div.innerHTML = `<strong>${nome}</strong><p>${comentario}</p><p>${estrelasTexto}</p>`;
-  
-      const listaAvaliacoes = document.getElementById('avaliacoes-lista');
-      listaAvaliacoes.prepend(div);
-  
-      formulario.reset();
-      atualizarEstrelas(0);
-      estrelasSelecionadas = 0;
-  
-      formulario.style.display = 'none';
-      abrirFormularioBtn.style.display = 'block';
-    }
-  
-    // Troca de idioma
-    function alternarIdioma() {
-      const btn = document.querySelector('.idioma-switch');
-      const langAtual = btn.innerText;
-      const novoLang = langAtual === 'EN' ? 'PT' : 'EN';
-      btn.innerText = novoLang;
-  
-      const t = textos[novoLang];
-  
-      document.getElementById("bemvindo-texto").innerHTML = t.bemvindoTexto;
-      document.getElementById("apresentacao-texto").innerHTML = t.apresentacaoTexto;
-      document.getElementById("fale-conosco").innerText = t.faleConosco;
-      document.getElementById("telefone").innerHTML = `<i class="fas fa-phone"></i> ${t.telefone}`;
-      document.getElementById("whatsapp").innerHTML = `<i class="fab fa-whatsapp"></i> ${t.whatsapp}`;
-      document.getElementById("email").innerHTML = `<i class="fas fa-envelope"></i> ${t.email}`;
-      document.getElementById("abrir-formulario-comentario").innerText = t.abrirFormularioComentario;
-      document.getElementById("botao-pedido").innerText = t.botaoPedido;
-      document.getElementById("titulo-avaliacoes").innerText = t.tituloAvaliacoes;
-      document.getElementById("link-materiais").innerText = t.linkMateriais;
-      document.getElementById("link-maps").innerText = t.linkMaps;
-      document.getElementById("proprietario-texto").innerText = t.proprietarioTexto;
-      document.getElementById("botao-enviar").innerText = t.botaoEnviar;
-    }
-    
-  // Equipamentos disponíveis
-  const equipamentos = [
-    { nome: "Betoneira", preco: "1.000 MZN/dia", icone: "fa-solid fa-truck-pickup" },
-    { nome: "Andaime", preco: "300 MZN/dia", icone: "fa-solid fa-city" },
-    { nome: "Vibrador de Concreto", preco: "800 MZN/dia", icone: "fa-solid fa-bolt" },
-    { nome: "Compactador", preco: "1.200 MZN/dia", icone: "fa-solid fa-road" },
-    { nome: "Cortadora de Piso", preco: "1.500 MZN/dia", icone: "fa-solid fa-scissors" }
-  ];
-
-  // Modal HTML
-  const modal = document.createElement('div');
-  modal.id = "modalAluguel";
-  modal.style.display = "none";
-  modal.innerHTML = `
-    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                background: rgba(0,0,0,0.6); display: flex; justify-content: center; 
-                align-items: center; z-index: 9999;">
-      <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 0 15px rgba(0,0,0,0.3);">
-        <h2 style="color: #d90000; font-size: 24px; margin-bottom: 20px; text-align: center;">Selecione os Equipamentos que Deseja Alugar</h2>
-        <div id="listaEquipamentos" style="margin-bottom: 25px;"></div>
-        <button onclick="enviarParaWhatsApp()" 
-                style="background: #25d366; color: white; padding: 12px 20px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; width: 100%; margin-bottom: 10px;">
-          📲 Falar no WhatsApp para Alugar
-        </button>
-        <button onclick="fecharModal()" 
-                style="background: #ccc; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; width: 100%;">
-          Cancelar
-        </button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  function abrirModalAluguel(e) {
-    e.preventDefault();
-    const lista = document.getElementById('listaEquipamentos');
-    lista.innerHTML = equipamentos.map((item, i) => `
-      <label style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-        <input type="checkbox" value="${item.nome}" data-preco="${item.preco}" style="margin-right: 12px; width: 18px; height: 18px;" />
-        <i class="${item.icone}" style="font-size: 22px; color: #87ceeb; width: 30px;"></i>
-        <div style="margin-left: 10px;">
-          <strong style="color: #333;">${item.nome}</strong><br>
-          <span style="font-size: 14px; color: #666;">${item.preco}</span>
-        </div>
-      </label>
-    `).join('');
-    modal.style.display = "flex";
-  }
-
-  function fecharModal() {
-    modal.style.display = "none";
-  }
-
-  function enviarParaWhatsApp() {
-  const selecionados = document.querySelectorAll('#listaEquipamentos input[name="equipamento"]:checked');
-
-  if (selecionados.length === 0) {
-    alert("Selecione pelo menos um equipamento para alugar.");
-    return;
-  }
-
-  let mensagem = "🔧 *Pedido de Aluguer de Equipamentos*\n\n";
-  let total = 0;
-
-  selecionados.forEach(cb => {
-    const nome = cb.value;
-    const precoTexto = cb.dataset.preco;
-    const precoNum = parseFloat(precoTexto.replace(/[^\d.,]/g, '').replace(',', '.'));
-    total += precoNum;
-
-    mensagem += `• ${nome} — _${precoTexto}_\n`;
-  });
-
-  // Obter data e hora atual formatada
-  const agora = new Date();
-  const dia = agora.getDate().toString().padStart(2, '0');
-  const mes = (agora.getMonth() + 1).toString().padStart(2, '0');
-  const ano = agora.getFullYear();
-  const horas = agora.getHours().toString().padStart(2, '0');
-  const minutos = agora.getMinutes().toString().padStart(2, '0');
-  const dataHora = `${dia}/${mes}/${ano} às ${horas}:${minutos}`;
-
-  mensagem += `\n🧾 *Total a pagar:* _${total.toFixed(2)} MZN/dia_`;
-  mensagem += `\n📆 *Data do Pedido:* ${dataHora}`;
-  mensagem += `\n\n📍 Aluguer feito através do site *Vision Construções*`;
-  mensagem += `\n⏳ Estamos à disposição para combinar a entrega.`;
-
-  const url = `https://wa.me/258877743076?text=${encodeURIComponent(mensagem)}`;
-  window.open(url, "_blank");
-  fecharModal();
-}
-document.querySelectorAll('#listaEquipamentos input[name="equipamento"]:checked')
-
-
-  // Atualiza total no modal
-  function atualizarTotal() {
-    const selecionados = document.querySelectorAll('#listaEquipamentos input:checked');
-    let total = 0;
-    selecionados.forEach(cb => {
-      const preco = parseInt(cb.dataset.preco.replace(/[^\d]/g, ''));
-      total += isNaN(preco) ? 0 : preco;
+      adicionarProdutoCarrinha(produtoSelecionado.id, qtd);
+      fecharModal();
+      abrirCarrinha();
     });
 
-    let totalEl = document.getElementById('totalAluguel');
-    if (!totalEl) {
-      totalEl = document.createElement('div');
-      totalEl.id = 'totalAluguel';
-      totalEl.style = 'text-align:center; font-size:18px; font-weight:bold; margin-top:10px; color:#333;';
-      document.querySelector('#listaEquipamentos').insertAdjacentElement('afterend', totalEl);
+    // Adicionar produto na carrinha
+    function adicionarProdutoCarrinha(id, qtd) {
+      const itemExistente = carrinha.find(item => item.produtoId === id);
+      if (itemExistente) {
+        itemExistente.quantidade += qtd;
+      } else {
+        carrinha.push({ produtoId: id, quantidade: qtd });
+      }
+      atualizarCarrinha();
     }
-    totalEl.innerText = `Total: ${total.toLocaleString()} MZN`;
-  }
 
-  // Altera a função abrirModalAluguel
-function abrirModalAluguel(e) {
-  e.preventDefault();
-  const lista = document.getElementById('listaEquipamentos');
-  lista.innerHTML = `
-    <div style="margin-bottom: 20px;">
-      <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #d90000;">Seu nome:</label>
-      <input type="text" id="nomeClienteAluguel" placeholder="Digite seu nome" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" required />
-    </div>
-    <div style="margin-bottom: 20px;">
-      <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #d90000;">Seu telefone:</label>
-      <input type="tel" id="telefoneClienteAluguel" placeholder="Digite seu telefone" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" required />
-    </div>
-  ` + equipamentos.map((item, i) => `
-    <label style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; gap: 10px;">
-      <input type="checkbox" name="equipamento" value="${item.nome}" data-preco="${item.preco}" style="width: 18px; height: 18px;" />
-      <i class="${item.icone}" style="font-size: 22px; color: #87ceeb; width: 30px;"></i>
-      <div style="flex: 1;">
-        <strong style="color: #333;">${item.nome}</strong><br>
-        <span style="font-size: 14px; color: #666;">${item.preco}</span>
-      </div>
-      <input type="number" name="dias" min="1" value="1" style="width: 60px; padding: 5px; border-radius: 5px; border: 1px solid #ccc;" title="Dias para alugar" />
-    </label>
-  `).join('');
-  modal.style.display = "flex";
-}
+    // Atualizar a visualização da carrinha
+    function atualizarCarrinha() {
+      listaItens.innerHTML = '';
+      let totalItens = 0;
+      carrinha.forEach(item => {
+        const produto = produtos.find(p => p.id === item.produtoId);
+        if (!produto) return;
+        totalItens += item.quantidade;
 
-function enviarParaWhatsApp() {
-  const nomeCliente = document.getElementById('nomeClienteAluguel').value.trim();
-  const telefoneCliente = document.getElementById('telefoneClienteAluguel').value.trim();
+        const divItem = document.createElement('div');
+        divItem.className = 'item-carrinha';
+        divItem.innerHTML = `
+          <span>${produto.nome}</span>
+          <span class="qtde">x${item.quantidade}</span>
+          <button class="remover-btn" aria-label="Remover ${produto.nome}" title="Remover" onclick="removerItem(${produto.id})">&times;</button>
+        `;
+        listaItens.appendChild(divItem);
+      });
+      totalItensSpan.textContent = totalItens;
+      atualizarTotalFatura();
+    }
 
-  if (!nomeCliente) {
-    alert("Por favor, digite seu nome.");
-    return;
-  }
-  if (!telefoneCliente) {
-    alert("Por favor, digite seu telefone.");
-    return;
-  }
+    // Remover item da carrinha
+    function removerItem(id) {
+      carrinha = carrinha.filter(item => item.produtoId !== id);
+      atualizarCarrinha();
+    }
 
-  const selecionados = document.querySelectorAll('#listaEquipamentos input[name="equipamento"]:checked');
-  if (selecionados.length === 0) {
-    alert("Selecione pelo menos um equipamento para alugar.");
-    return;
-  }
+    // Calcular e mostrar total da fatura
+    function atualizarTotalFatura() {
+      let total = 0;
+      carrinha.forEach(item => {
+        const produto = produtos.find(p => p.id === item.produtoId);
+        if (!produto) return;
+        total += produto.preco * item.quantidade;
+      });
+      totalFatura.textContent = `Total: MZN ${total.toLocaleString('pt-MZ')}`;
+    }
 
-  let mensagem = `Olá! Meu nome é ${nomeCliente}.\nTelefone: ${telefoneCliente}\n\nGostaria de alugar os seguintes equipamentos:\n\n`;
-  let totalGeral = 0;
+    // Alternar abrir/fechar carrinha
+    function toggleCarrinha() {
+      carrinhaAberta = !carrinhaAberta;
+      const carrinhaBody = document.getElementById('carrinhaBody');
+      const carrinhaHeader = document.querySelector('.carrinha-header');
 
-  selecionados.forEach(cb => {
-    const label = cb.parentElement;
-    const nome = cb.value;
-    const precoStr = cb.dataset.preco; // ex: "1.000 MZN/dia"
-    const precoNum = Number(precoStr.replace(/\D/g, '')); // extrai número só (ex: 1000)
+      carrinhaBody.style.display = carrinhaAberta ? 'flex' : 'none';
+      carrinhaHeader.setAttribute('aria-expanded', carrinhaAberta ? 'true' : 'false');
+    }
+      document.addEventListener('click', (event) => {
+  const target = event.target;
 
-    const inputDias = label.querySelector('input[name="dias"]');
-    let dias = parseInt(inputDias.value);
-    if (isNaN(dias) || dias < 1) dias = 1;
-
-    const subtotal = precoNum * dias;
-    totalGeral += subtotal;
-
-    mensagem += `• ${nome} - ${dias} dia(s) x ${precoNum.toLocaleString()} MZN = ${subtotal.toLocaleString()} MZN\n`;
-  });
-
-  const dataHora = new Date().toLocaleString('pt-BR');
-
-  mensagem += `\nTotal geral: ${totalGeral.toLocaleString()} MZN\n`;
-  mensagem += `Data e hora do pedido: ${dataHora}`;
-
-  const url = `https://wa.me/258877743076?text=${encodeURIComponent(mensagem)}`;
-  window.open(url, "_blank");
-  fecharModal();
-}
-
-
-function enviarParaWhatsApp() {
-  const nomeCliente = document.getElementById('nomeClienteAluguel').value.trim();
-  const telefoneCliente = document.getElementById('telefoneClienteAluguel').value.trim();
-
-  if (!nomeCliente) {
-    alert("Por favor, digite seu nome.");
-    return;
-  }
-  if (!telefoneCliente) {
-    alert("Por favor, digite seu telefone.");
-    return;
-  }
-
-  const selecionados = document.querySelectorAll('#listaEquipamentos input[name="equipamento"]:checked');
-  if (selecionados.length === 0) {
-    alert("Selecione pelo menos um equipamento para alugar.");
-    return;
-  }
-
-  let mensagem = `Olá! Meu nome é ${nomeCliente}.\nTelefone: ${telefoneCliente}\n\nGostaria de alugar os seguintes equipamentos:\n\n`;
-  let totalGeral = 0;
-
-  selecionados.forEach(cb => {
-    const label = cb.parentElement;
-    const nome = cb.value;
-    const precoStr = cb.dataset.preco; // exemplo "1.000 MZN/dia"
-    const precoNum = Number(precoStr.replace(/\D/g, '')); // extrai número só (ex: 1000)
-
-    // Pega o input do número de dias no mesmo label
-    const inputDias = label.querySelector('input[name="dias"]');
-    let dias = parseInt(inputDias.value);
-    if (isNaN(dias) || dias < 1) dias = 1;
-
-    const subtotal = precoNum * dias;
-    totalGeral += subtotal;
-
-    mensagem += `• ${nome} - ${dias} dia(s) x ${precoNum.toLocaleString()} MZN = ${subtotal.toLocaleString()} MZN\n`;
-  });
-
-  // Data e hora atual formatada
-  const dataHora = new Date().toLocaleString('pt-BR');
-
-  mensagem += `\nTotal geral: ${totalGeral.toLocaleString()} MZN\n`;
-  mensagem += `Data e hora do pedido: ${dataHora}`;
-
-  const url = `https://wa.me/258877743076?text=${encodeURIComponent(mensagem)}`;
-  window.open(url, "_blank");
-  fecharModal();
-}
-  // Histórico em localStorage e geração do PDF
-  function gerarReciboPDF() {
-    const nomeCliente = prompt("Digite seu nome para registrar o pedido:");
-    if (!nomeCliente) return;
-
-    const data = new Date().toLocaleString();
-    const nomeDono = "João da Silva";
-
-    const produtosPedido = ["", ""]; // aqui você pode puxar os produtos reais
-    const novoPedido = { data, nomeCliente, nomeDono, produtos: produtosPedido };
-
-    const historico = JSON.parse(localStorage.getItem('historicoPedidos') || "[]");
-    historico.push(novoPedido);
-    localStorage.setItem('historicoPedidos', JSON.stringify(historico));
-
-    // Gera o conteúdo do PDF
-    let conteudo = "📋 Histórico de Encomendas\n\n";
-    historico.forEach((pedido, i) => {
-      conteudo += `#${i + 1} - ${pedido.data}\nCliente: ${pedido.nomeCliente}\nDono: ${pedido.nomeDono}\nProdutos: ${pedido.produtos.join(', ')}\n\n`;
-    });
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const linhas = conteudo.split("\n");
-    linhas.forEach((linha, i) => doc.text(linha, 10, 10 + i * 8));
-    doc.save("historico_pedidos.pdf");
-  }
-  
-const elementos = document.querySelectorAll('.texto-esquerdo, .imagem-direito, .avaliacoes');
-
-function mostrarElementoAoRolar() {
-  const triggerBottom = window.innerHeight * 0.85;
-
-  elementos.forEach(el => {
-    const topElemento = el.getBoundingClientRect().top;
-
-    if(topElemento < triggerBottom){
-      el.style.opacity = 1;
-      el.style.transform = 'translateY(0)';
-      el.style.transition = 'all 0.7s ease-out';
+  if (carrinhaAberta) {
+    const dentroCarrinha = carrinhaContainer.contains(target);
+    if (!dentroCarrinha) {
+      toggleCarrinha();
     } else {
-      el.style.opacity = 0;
-      el.style.transform = 'translateY(40px)';
+      if (
+        target.tagName === 'BUTTON' &&
+        !target.classList.contains('carrinha-header')
+      ) {
+        toggleCarrinha();
+      }
     }
-  });
-}
-window.addEventListener('scroll', mostrarElementoAoRolar);
-
-document.addEventListener('DOMContentLoaded', () => {
-  const btnHamburguer = document.getElementById('btnHamburguer');
-  const menuLinks = document.getElementById('menuLinks');
-
-  btnHamburguer.addEventListener('click', () => {
-    menuLinks.classList.toggle('show');
-  });
-
-  // Botão na navbar
-  const btnAluguel = document.createElement('a');
-  btnAluguel.href = "#";
-  btnAluguel.className = "logo-nome-link";
-  btnAluguel.innerText = "🔧 Aluguer de Equipamentos";
-  btnAluguel.onclick = abrirModalAluguel;
-  document.querySelector('.navbar').appendChild(btnAluguel);
-
-  menuLinks.appendChild(btnAluguel);
+  }
 });
 
-</script>
+
+    // Forçar abrir carrinha
+    function abrirCarrinha() {
+      if (!carrinhaAberta) toggleCarrinha();
+    }
+
+    // Mostrar/ocultar campo endereço de entrega
+    function toggleEndereco() {
+      enderecoContainer.style.display = checkboxEntrega.checked ? 'flex' : 'none';
+    }
+
+    // Confirmar pedido e enviar via WhatsApp
+    function confirmarCarrinha() {
+  const nomeCliente = inputNomeProprietario.value.trim();
+  if (!nomeCliente) {
+    alert('Por favor, informe seu nome para confirmar o pedido.');
+    inputNomeProprietario.focus();
+    return;
+  }
+  if (carrinha.length === 0) {
+    alert('Sua carrinha está vazia.');
+    return;
+  }
+  if (checkboxEntrega.checked) {
+    const endereco = inputEndereco.value.trim();
+    if (!endereco) {
+      alert('Por favor, informe o endereço para entrega.');
+      inputEndereco.focus();
+      return;
+    }
+  }
+
+  // Agrupar produtos por categoria
+  const agrupados = {};
+  carrinha.forEach(item => {
+    const prod = produtos.find(p => p.id === item.produtoId);
+    if (!prod) return;
+    if (!agrupados[prod.categoria]) agrupados[prod.categoria] = [];
+    agrupados[prod.categoria].push({ nome: prod.nome, preco: prod.preco, qtd: item.quantidade });
+  });
+
+  // Montar mensagem organizada por categoria com subtotais
+  let mensagem = `Olá, gostaria de fazer um pedido:\n\nCliente: ${nomeCliente}\n`;
+  if (checkboxEntrega.checked) {
+    mensagem += `Entrega: Sim\nEndereço: ${inputEndereco.value.trim()}\n\n`;
+  } else {
+    mensagem += `Entrega: Não\n\n`;
+  }
+
+  let totalFinal = 0;
+  for (const cat of categorias) {
+    if (!agrupados[cat]) continue;
+    mensagem += `*${cat}*\n`;
+    let subtotal = 0;
+    agrupados[cat].forEach(prod => {
+      const precoTotal = prod.preco * prod.qtd;
+      subtotal += precoTotal;
+      mensagem += `- ${prod.nome} x${prod.qtd}: MZN ${precoTotal.toLocaleString('pt-MZ')}\n`;
+    });
+    mensagem += `Subtotal ${cat}: MZN ${subtotal.toLocaleString('pt-MZ')}\n\n`;
+    totalFinal += subtotal;
+  }
+
+  mensagem += `*Total Final: MZN ${totalFinal.toLocaleString('pt-MZ')}*\n\nMuito obrigado!`;
+
+  // Codifica e abre WhatsApp
+  const textoUrl = encodeURIComponent(mensagem);
+  const telefoneDestino = '258877743076'; // ajuste conforme seu número real
+  window.open(`https://wa.me/${telefoneDestino}?text=${textoUrl}`, '_blank');
+}
+
+    // Fechar modal ao clicar fora do conteúdo
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) fecharModal();
+    });
+
+    // Fechar modal com ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        fecharModal();
+      }
+    });
+    let idiomaAtual = 'pt';
+
+const dicionario = {
+  pt: {
+    "Encomendas": "Encomendas",
+    "Experiências em Obras": "Experiências em Obras",
+    "Materiais Disponíveis": "Materiais Disponíveis",
+    "Experiências em Obras com Vision Construções": "Experiências em Obras com Vision Construções",
+    "Conheça alguns dos projetos e instalações onde nossos materiais foram utilizados, garantindo qualidade, resistência e satisfação dos nossos clientes.":
+      "Conheça alguns dos projetos e instalações onde nossos materiais foram utilizados, garantindo qualidade, resistência e satisfação dos nossos clientes.",
+    "Seu nome (cliente):": "Seu nome (cliente):",
+    "Quero entrega ao domicílio (taxa extra conforme distância)": "Quero entrega ao domicílio (taxa extra conforme distância)",
+    "Endereço para entrega:": "Endereço para entrega:",
+    "Confirmar Pedido": "Confirmar Pedido",
+    "voltar a pagina inicial": "voltar a pagina inicial",
+    "Clique para abrir/fechar": "Clique para abrir/fechar",
+    "Carrinha": "Carrinha",
+    "Total:": "Total:"
+  },
+  en: {
+    "Encomendas": "Orders",
+    "Experiências em Obras": "Construction Experience",
+    "Materiais Disponíveis": "Available Materials",
+    "Experiências em Obras com Vision Construções": "Construction Experiences with Vision Construções",
+    "Conheça alguns dos projetos e instalações onde nossos materiais foram utilizados, garantindo qualidade, resistência e satisfação dos nossos clientes.":
+      "See some of the projects and installations where our materials were used, ensuring quality, durability, and customer satisfaction.",
+    "Seu nome (cliente):": "Your name (customer):",
+    "Quero entrega ao domicílio (taxa extra conforme distância)": "I want home delivery (extra fee based on distance)",
+    "Endereço para entrega:": "Delivery address:",
+    "Confirmar Pedido": "Confirm Order",
+    "voltar a pagina inicial": "back to homepage",
+    "Clique para abrir/fechar": "Click to open/close",
+    "Carrinha": "Cart",
+    "Total:": "Total:"
+  }
+};
+
+function alternarIdioma() {
+  idiomaAtual = idiomaAtual === 'pt' ? 'en' : 'pt';
+  const langAtual = idiomaAtual;
+  document.getElementById('btnIdioma').innerText = langAtual === 'pt' ? 'EN' : 'PT';
+
+  // Seleciona os elementos com texto que devem ser traduzidos
+  const todos = document.querySelectorAll('button, h1, h2, h3, p, label, .carrinha-header, .botao-confirmar, .logout-btn, small');
+
+  todos.forEach(el => {
+    const textoOriginal = el.getAttribute('data-original');
+    let textoAtual = textoOriginal || el.innerText.trim();
+
+    // Salva texto original se ainda não estiver salvo
+    if (!el.hasAttribute('data-original')) {
+      el.setAttribute('data-original', textoAtual);
+    }
+
+    const traducao = dicionario[langAtual][textoAtual];
+    if (traducao) {
+      el.innerText = traducao;
+    }
+  });
+}
+
+    // Montar produtos no carregamento da página
+    montarProdutos();
+  </script>
 </body>
 </html>
